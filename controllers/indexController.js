@@ -1,8 +1,8 @@
 module.exports = {
-    getImage(req, reply) {
+    getImage(req, h) {
         return h.file('./public/hapi.png');
     },
-    getHomepage(req, reply) {
+    getHomepage(req, h) {
         return h.view('index' ,{ title: 'My home page' }); 
     }
 }

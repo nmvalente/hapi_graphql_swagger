@@ -1,10 +1,10 @@
 const Painting = require('../models/Painting');
 
 module.exports = {
-    getUser(req, reply) {
+    getUser(req, h) {
         return req.params.name;
     },
-    test(req, reply) {
+    test(req, h) {
         return 'ok';
     }
 }

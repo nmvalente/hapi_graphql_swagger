@@ -1,27 +1,33 @@
 const Task = require('../models/Task');
 
-module.exports = {
-    create(req, h) {
-        let text = req.payload.text; // middleware and bodyparser in express, here just payload
-        let newTask = new Task({text: text});
-        newTask.save((err, task) => {
-            if(err) return new Error(err);
-            
-        })
-        return h.view('tasks');
+let create = (req, h) => {
+    let text = req.payload.text; // middleware and bodyparser in express, here just payload
+    let newTask = new Task({text: text});
+    newTask.save((err, task) => {
+        if(err) return new Error(err);
         
-    },
-    find(req, h) {
-        let arr_tasks = Task.find({}, function(err, tasks){
-            if(err) return new Error(err);
-            return tasks;                    
+    })
+    return find(req,h);
+};
+
+let find = async(req, h) => {
+    let tasks;
+    try{
+        tasks = await Task.find({}, function(err, tasks){
+            
+            console.log(tasks);
+            return tasks;
         });
-        console.log(arr_tasks);
-        return h.view('tasks' ,{
-            tasks: arr_tasks/*[
-                {_id: "1", text:"fdsf"},
-                {_id: "2", text: "dofhiio"},
-            ]*/
-        })
     }
+    catch(err){
+        return new Error(err);
+    }
+    return h.view('tasks' ,{
+        tasks
+    })
+};
+
+module.exports = {
+    create: create,
+    find: find
 };

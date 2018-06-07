@@ -10,8 +10,8 @@ const {
     GraphQLSchema
 } = graphql;
 
-const RootQuery = new GraphQLObjectType({
-    name: 'RootQueryType',
+const PaintingQuery = new GraphQLObjectType({
+    name: 'PaintingQueryType',
     fields: {
         painting: {
             type: PaintingType,
@@ -28,15 +28,17 @@ const TaskQuery = new GraphQLObjectType({
     fields: {
         task: {
             type: TaskType,
-            args: { id: { type: GraphQLString } },
             resolve(parent, args){
-                return Task.findById(args.id)
+                return Task.find()
             }
         }
     }
 });
 
-
-module.exports = new GraphQLSchema({
-    query: RootQuery
+module.exports = 
+new GraphQLSchema({        
+    query: TaskQuery
 });
+/*new GraphQLSchema({
+    query: PaintingQuery
+})*/

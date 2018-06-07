@@ -1,7 +1,7 @@
 const Painting = require('../models/Painting');
 
 module.exports = {
-    create(req, reply) {
+    create(req, h) {
         const { name, url, technique } = req.payload;
         const painting = new Painting({
             name,
@@ -11,7 +11,7 @@ module.exports = {
         
         return painting.save();
     },
-    find(req, reply) {
+    find(req, h) {
         return Painting.find();
     }
 }

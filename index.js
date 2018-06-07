@@ -15,7 +15,6 @@ const Joi = require('joi');
 const HapiSwagger = require('hapi-swagger');
 const Pack = require('./package'); // simple include our package.json file
 
-
 // Routes controller imports
 const paintingController = require('./controllers/paintingController');
 const taskController = require('./controllers/taskController');
@@ -75,7 +74,9 @@ const init = async () => {
     
     server.views({
         engines: {
-            html: require('handlebars')
+            html: {
+                module: require('handlebars')
+            }
         },
         relativeTo: __dirname,
         path: 'views',
