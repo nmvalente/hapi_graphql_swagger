@@ -5,13 +5,22 @@ const mongoose = require('mongoose');
 const { graphqlHapi, graphiqlHapi } = require('apollo-server-hapi');
 const schema = require('./graphql/schema');
 const Painting = require('./models/Painting');
+const Task = require('./models/Task');
 const config = require('./config');
 
 /* swagger section */
 const Inert = require('inert'); // for load static content like css, html files, images,...
 const Vision = require('vision'); // for use views engine
+const Joi = require('joi'); 
 const HapiSwagger = require('hapi-swagger');
-const Pack = require('./package');
+const Pack = require('./package'); // simple include our package.json file
+
+
+// Routes controller imports
+const paintingController = require('./controllers/paintingController');
+const taskController = require('./controllers/taskController');
+const indexController = require('./controllers/indexController');
+const apiController = require('./controllers/apiController');
 
 const server = hapi.server({
     port: 4000,
@@ -24,7 +33,6 @@ mongoose.connection.once('open', () => {
 });
 
 const init = async () => {
-    
     await server.register([
         Inert, 
         Vision,
@@ -82,9 +90,7 @@ const init = async () => {
                 description: 'Homepage',
                 tags: ['home']
             },
-            handler: (req, h) => {
-                return h.view('index' ,{ title: 'My home page' }); 
-            }
+            handler: indexController.getHomepage
         },
         {                                   // use of static
             method: 'GET',
@@ -93,9 +99,7 @@ const init = async () => {
                 description: 'Image',
                 tags: ['image']
             },
-            handler: (req, h) => {
-                return h.file('./public/hapi.png');
-            }
+            handler: indexController.getImage
         },
         {                                 // example to iterate over array on /tasks                  
             method: 'GET',
@@ -104,15 +108,16 @@ const init = async () => {
                 description: 'Tasks',
                 tags: ['tasks']
             },
-            handler: (req, h) => {
-                return h.view('tasks' ,{
-                    tasks: [ 
-                        {text: 'Task one'},
-                        {text: 'Task two'},
-                        {text: 'Task three'}
-                    ]
-                }); 
-            }
+            handler: taskController.find
+        },
+        {                                 // example to iterate over array on /tasks                  
+            method: 'POST',
+            path: '/tasks',
+            config: {
+                description: 'Tasks',
+                tags: ['tasks']
+            },
+            handler: taskController.create
         },
         {
             method: 'GET',
@@ -121,9 +126,7 @@ const init = async () => {
                 description: 'Only for test purposes',
                 tags: ['api']
             },
-            handler: (req, h) => {
-                return 'ok';
-            }
+            handler: apiController.test
         },
         {
             method: 'GET',
@@ -132,19 +135,24 @@ const init = async () => {
                 description: 'Get all the paintings',
                 tags: ['api', 'v1', 'painting']
             },
-            handler: (req, h) => {
-                return Painting.find();
-            }
+            handler: paintingController.find
         },
         {
-            method: 'DELETE',
+            method: 'GET',
             path: '/api/user/{name}',
+            handler: apiController.getUser,
             config: {
                 description: 'Name of an user',
-                tags: ['api', 'user', 'name']
-            },
-            handler: (req, h) => {
-                return req.params.name;
+                tags: ['api', 'user', 'name'],
+                validate: {
+                    params: {
+                        name: Joi.string().min(3).max(10)
+                    },
+                    failAction: (request, h, err) => {
+                        throw err;
+                        return;
+                    }
+                }
             }
         },
         {
@@ -154,16 +162,7 @@ const init = async () => {
                 description: 'Get a specific painting by ID.',
                 tags: ['api', 'v1', 'painting']
             },
-            handler: (req, h) => {
-                const { name, url, technique } = req.payload;
-                const painting = new Painting({
-                    name,
-                    url,
-                    technique
-                });
-                
-                return painting.save();
-            }
+            handler: paintingController.create
         }
     ]);
     
