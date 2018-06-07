@@ -24,7 +24,7 @@ mongoose.connection.once('open', () => {
 });
 
 const init = async () => {
-       
+    
     await server.register([
         Inert, 
         Vision,
@@ -73,92 +73,108 @@ const init = async () => {
         path: 'views',
         helpersPath: 'helpers' // use on index.html
     });
-        
-        server.route([
-            {                                   // use of views - load and send data to a view
-                method: 'GET',
-                path: '/',
-                config: {
-                    description: 'Homepage',
-                    tags: ['home']
-                },
-                handler: (req, h) => {
-                    return h.view('index' ,{ title: 'My home page' }); 
-                }
+    
+    server.route([
+        {                                   // use of views - load and send data to a view
+            method: 'GET',
+            path: '/',
+            config: {
+                description: 'Homepage',
+                tags: ['home']
             },
-            {                                   // use of static
-                method: 'GET',
-                path: '/image',
-                config: {
-                    description: 'Image',
-                    tags: ['image']
-                },
-                handler: (req, h) => {
-                    return h.file('./public/hapi.png');
-                }
-            },
-            {
-                method: 'GET',
-                path: '/api/',
-                config: {
-                    description: 'Only for test purposes',
-                    tags: ['api']
-                },
-                handler: (req, h) => {
-                    return 'ok';
-                }
-            },
-            {
-                method: 'GET',
-                path: '/api/v1/paintings',
-                config: {
-                    description: 'Get all the paintings',
-                    tags: ['api', 'v1', 'painting']
-                },
-                handler: (req, h) => {
-                    return Painting.find();
-                }
-            },
-            {
-                method: 'DELETE',
-                path: '/api/user/{name}',
-                config: {
-                    description: 'Name of an user',
-                    tags: ['api', 'user', 'name']
-                },
-                handler: (req, h) => {
-                    return req.params.name;
-                }
-            },
-            {
-                method: 'POST',
-                path: '/api/v1/paintings',
-                config: {
-                    description: 'Get a specific painting by ID.',
-                    tags: ['api', 'v1', 'painting']
-                },
-                handler: (req, h) => {
-                    const { name, url, technique } = req.payload;
-                    const painting = new Painting({
-                        name,
-                        url,
-                        technique
-                    });
-                    
-                    return painting.save();
-                }
+            handler: (req, h) => {
+                return h.view('index' ,{ title: 'My home page' }); 
             }
-        ]);
-        
-        await server.start();
-        console.log(`Server running at: ${server.info.uri}`);
-    };
+        },
+        {                                   // use of static
+            method: 'GET',
+            path: '/image',
+            config: {
+                description: 'Image',
+                tags: ['image']
+            },
+            handler: (req, h) => {
+                return h.file('./public/hapi.png');
+            }
+        },
+        {                                 // example to iterate over array on /tasks                  
+            method: 'GET',
+            path: '/tasks',
+            config: {
+                description: 'Tasks',
+                tags: ['tasks']
+            },
+            handler: (req, h) => {
+                return h.view('tasks' ,{
+                    tasks: [ 
+                        {text: 'Task one'},
+                        {text: 'Task two'},
+                        {text: 'Task three'}
+                    ]
+                }); 
+            }
+        },
+        {
+            method: 'GET',
+            path: '/api/',
+            config: {
+                description: 'Only for test purposes',
+                tags: ['api']
+            },
+            handler: (req, h) => {
+                return 'ok';
+            }
+        },
+        {
+            method: 'GET',
+            path: '/api/v1/paintings',
+            config: {
+                description: 'Get all the paintings',
+                tags: ['api', 'v1', 'painting']
+            },
+            handler: (req, h) => {
+                return Painting.find();
+            }
+        },
+        {
+            method: 'DELETE',
+            path: '/api/user/{name}',
+            config: {
+                description: 'Name of an user',
+                tags: ['api', 'user', 'name']
+            },
+            handler: (req, h) => {
+                return req.params.name;
+            }
+        },
+        {
+            method: 'POST',
+            path: '/api/v1/paintings',
+            config: {
+                description: 'Get a specific painting by ID.',
+                tags: ['api', 'v1', 'painting']
+            },
+            handler: (req, h) => {
+                const { name, url, technique } = req.payload;
+                const painting = new Painting({
+                    name,
+                    url,
+                    technique
+                });
+                
+                return painting.save();
+            }
+        }
+    ]);
     
-    process.on('unhandledRejection', (err) => {
-        
-        console.log(err);
-        process.exit(1);
-    });
+    await server.start();
+    console.log(`Server running at: ${server.info.uri}`);
+};
+
+process.on('unhandledRejection', (err) => {
     
-    init();
-    
+    console.log(err);
+    process.exit(1);
+});
+
+init();
